@@ -452,12 +452,16 @@ class ConfigScene:
         )
         if not file_path:
             return
+
+        data = {}
+
+        # Основная область
         if self.current_shape == "Куб":
             try:
                 size = float(self.size_entry.get())
             except ValueError:
                 size = 50
-            data = {"shape": "Куб", "size": size}
+            data["area"] = {"shape": "Куб", "size": size}
         else:
             try:
                 w = float(self.width_entry.get())
@@ -465,7 +469,22 @@ class ConfigScene:
                 h = float(self.height_entry.get())
             except ValueError:
                 w, l, h = 100, 150, 80
-            data = {"shape": "Параллелепипед", "width": w, "length": l, "height": h}
+            data["area"] = {"shape": "Параллелепипед", "width": w, "length": l, "height": h}
+
+        # Добавленные модели
+        data["models"] = []
+        for child in self.root.getChildren():
+            if child.hasTag("clickable"):
+                pos = child.getPos()
+                hpr = child.getHpr()
+                path = child.getPythonTag("path")
+                model_data = {
+                    "path": path,
+                    "position": {"x": pos.x, "y": pos.y, "z": pos.z},
+                    "rotation": {"x": hpr.x, "y": hpr.y, "z": hpr.z}
+                }
+                data["models"].append(model_data)
+
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
