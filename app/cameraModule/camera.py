@@ -3,7 +3,7 @@ from panda3d.core import Point3, Vec3
 from direct.task import Task
 
 class CameraControl:
-    def __init__(self, base, center=Point3(0, 0, 0), distance=600.0):
+    def __init__(self, base, center=Point3(0, 0, 0), distance=150.0):
         self.base = base
         self.center = Point3(center)
         self.distance = distance

@@ -3,6 +3,7 @@ from direct.gui.DirectFrame import DirectFrame
 from direct.gui.DirectLabel import DirectLabel
 from direct.gui.DirectEntry import DirectEntry
 from direct.gui.DirectGui import DGG
+from direct.gui.OnscreenImage import OnscreenImage
 from panda3d.core import (
     NodePath, Point3, TransparencyAttrib,
     TextNode, BitMask32, CollisionTraverser, CollisionNode,
@@ -25,6 +26,20 @@ class ConfigScene:
         self.box.reparentTo(self.root)
 
         self.camera_control = CameraControl(base=self.base, center=Point3(0, 0, 25))
+
+        self.top_panel = DirectFrame(
+            frameSize=(-1.9, 1.9, -0.12, 0.12),
+            frameColor=(0, 0, 0, 0.4),
+            parent=self.root,
+            pos=(0, 0, 0.88)
+        )
+        self.logo = OnscreenImage(
+            image="media/logo/wgite.png",
+            scale=(0.33, 0, 0.12),
+            parent=self.top_panel,
+            pos=(-1.6, 0, 0)
+        )
+        self.top_panel.reparentTo(self.base.aspect2d)
 
         self.toggle_btn = DirectButton(
             image='media/button/m.png',
@@ -194,6 +209,18 @@ class ConfigScene:
             text_pos=(0, -0.01),
             relief=DGG.FLAT,
             frameColor=Config.OPTION_ITEM_FRAME_COLOR,
+        )
+        self.back_btn = DirectButton(
+            parent=self.top_panel,
+            text="Назад в меню",
+            text_font=self.font,
+            text_scale=0.05,
+            command=self.go_back_to_menu,
+            pos=(1.5, 0, 0),
+            frameSize=(-0.3, 0.3, -0.07, 0.07),
+            text_pos=(0, -0.01),
+            relief=DGG.FLAT,
+            frameColor=(0.8, 0.3, 0.3, 1),
         )
 
         self.width_label.hide()
@@ -417,7 +444,10 @@ class ConfigScene:
             max_dim = max(w, l, h)
         self.box.reparentTo(self.root)
         self.camera_control.center = Point3(0, 0, center_z)
-        self.camera_control.set_distance(max_dim * 2.0)
+        if max_dim < 70:
+            self.camera_control.set_distance(max_dim * 3)
+        else:
+            self.camera_control.set_distance(max_dim * 2)
 
     def open_sidebar(self):
         self.toggle_btn.hide()
@@ -435,6 +465,18 @@ class ConfigScene:
     def on_exit(self):
         self.camera_control.disable()
         self.root.detachNode()
+
+    def go_back_to_menu(self):
+        from app.menuScene.menuScene import MenuScene
+
+        # Скрываем все GUI элементы ConfigScene
+        self.sidebar.hide()
+        self.model_panel.hide()
+        self.toggle_btn.hide()
+        self.top_panel.hide()
+
+        menu_scene = MenuScene(self.base, self.base.screen_manager)
+        self.base.screen_manager.switch_to(menu_scene.root, is_3d=False)
 
     def get_root(self):
         return self.root
